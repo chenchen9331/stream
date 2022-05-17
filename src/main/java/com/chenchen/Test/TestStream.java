@@ -5,6 +5,7 @@ import com.chenchen.entity.Book;
 
 import java.util.*;
 import java.util.function.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TestStream {
@@ -32,7 +33,142 @@ public class TestStream {
         //test7();
 
         // 这些作家一共写了多少本书
-        test8();
+        //test8();
+
+        // 找出最贵与最便宜的书
+        //test9();
+
+        // 获取一个可以存放所有作家名字的集合分别使用list，set，map
+        //test10();
+
+        // 判断是否有29岁以上的作家
+        //test11();
+
+        // 是否存在未成年作家（18岁以下）
+        //test12();
+
+        // 判断是否作家都超过100岁
+        //test13();
+
+        // 获取任意一个年龄大于18的作家，存在返回姓名
+        //test14();
+
+        // 获取年龄最小的一个作家，存在返回姓名
+        //test15();
+
+        // 用reduce求所有作者的年龄和
+        //test16();
+
+        // 用reduce求作者年龄的最大最小值
+        test17();
+    }
+
+    /**
+     * 用reduce求作者年龄的最大最小值
+     */
+    private static void test17() {
+        Optional<Integer> max = getAuthors().stream()
+                .map(author -> author.getAge())
+                .reduce((result, element) -> result > element ? result : element);
+        System.out.println(max.get());
+    }
+
+    /**
+     * 用reduce求所有作者的年龄和
+     */
+    private static void test16() {
+        Integer reduce = getAuthors().stream()
+                .map(author -> author.getAge())
+                .reduce(0, (result, element) -> result + element);
+        System.out.println(reduce);
+    }
+
+    private static void test15() {
+        Optional<Author> first = getAuthors().stream()
+                .sorted((o1, o2) -> {
+                    int i = o1.getAge() - o2.getAge();
+                    return i;
+                })
+                .findFirst();
+        first.ifPresent(author -> System.out.println(author.getName()));
+    }
+
+    /**
+     * 获取任意一个年龄大于18的作家，存在返回姓名
+     */
+    private static void test14() {
+        Optional<Author> any = getAuthors().stream()
+                .filter(author -> author.getAge() > 18)
+                .findAny();
+        any.ifPresent(author -> System.out.println("姓名：" + author.getName()));
+    }
+
+    /**
+     * 判断是否作家都超过100岁
+     */
+    private static void test13() {
+        boolean b = getAuthors().stream().noneMatch(author -> author.getAge() < 100);
+        System.out.println("判断是否作家都超过100岁:" + b);
+    }
+
+    /**
+     * 是否存在未成年作家（18岁以下）
+     */
+    private static void test12() {
+        boolean isExit = getAuthors().stream()
+                .allMatch(author -> author.getAge() < 18);
+        System.out.println("是否存在未成年作家：" + isExit);
+    }
+
+    /**
+     * 判断是否有29岁以上的作家
+     */
+    private static void test11() {
+        boolean b = getAuthors().stream().anyMatch(author -> author.getAge() > 29);
+        System.out.println("是否存在29岁以上的作家：" + b);
+    }
+
+    /**
+     * 获取一个可以存放所有作家名字的集合分别使用list，set，map
+     */
+    private static void test10() {
+        // 作者姓名
+        List<String> nameList = getAuthors().stream()
+                .map(author -> author.getName())
+                .distinct()
+                .collect(Collectors.toList());
+        System.out.println(nameList);
+
+        // 书名
+        Set<String> bookNameList = getAuthors().stream()
+                .flatMap(author -> author.getBookList().stream())
+                .map(book -> book.getName())
+                .collect(Collectors.toSet());
+        System.out.println(bookNameList);
+
+        // 作家，书map
+        Map<String, List<Book>> collect = getAuthors().stream()
+                .distinct()
+                .collect(Collectors.toMap(author -> author.getName(), author -> author.getBookList()));
+        System.out.println(collect);
+    }
+
+    /**
+     * 找出最贵与最便宜的书
+     */
+    private static void test9() {
+        Optional<Double> max = getAuthors().stream()
+                .flatMap(author -> author.getBookList().stream())
+                .map(book -> book.getScore())
+                .max((o1, o2) -> o1.intValue() - o2.intValue());
+
+        Optional<Double> min = getAuthors().stream()
+                .flatMap(author -> author.getBookList().stream())
+                .map(book -> book.getScore())
+                .min((o1, o2) -> o1.intValue() - o2.intValue());
+
+        System.out.println("图书最高价为：" + max.get());
+        System.out.println("图书最低价为：" + min.get());
     }
 
     /**
